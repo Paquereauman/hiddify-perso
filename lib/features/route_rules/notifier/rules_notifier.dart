@@ -24,6 +24,7 @@ const _geositeUrl = 'https://raw.githubusercontent.com/SagerNet/sing-geosite/rul
 /// only switch and move them, and their content comes from here, so an update can change it.
 enum BuiltinRule {
   bypassLan(enabledByDefault: true),
+  chinaApps(enabledByDefault: true),
   systemDirect(enabledByDefault: false),
   blockAds(enabledByDefault: false),
   bypassRegion(enabledByDefault: true);
@@ -43,6 +44,7 @@ enum BuiltinRule {
 
   String present(Translations t, Region region) => switch (this) {
     bypassLan => t.pages.settings.routing.builtinRules.bypassLan,
+    chinaApps => 'Chine en direct (Taobao, Pinduoduo, Doubao, Alipay, WeChat…)',
     systemDirect => switch (defaultTargetPlatform) {
       TargetPlatform.iOS || TargetPlatform.macOS => t.pages.settings.routing.builtinRules.systemDirect.apple,
       TargetPlatform.windows => t.pages.settings.routing.builtinRules.systemDirect.microsoft,
@@ -70,6 +72,40 @@ enum BuiltinRule {
         '::1/128',
         'ff00::/8',
         '::/128',
+        // perso : diffusion locale (découverte KDE Connect, imprimantes…)
+        '255.255.255.255/32',
+        '100.64.0.0/10',
+      ],
+    ),
+    // perso : services chinois en direct, sans attendre le téléchargement des rule-sets (GitHub est
+    // souvent inaccessible depuis la Chine)
+    chinaApps => Rule(
+      outbound: Outbound.direct,
+      domainSuffixes: [
+        'cn',
+        // Alibaba / Taobao / Tmall / Alipay / Xianyu / Cainiao / Fliggy
+        'taobao.com', 'tmall.com', 'tmall.hk', 'alicdn.com', 'alibaba.com', 'alibabacloud.com', 'aliyun.com',
+        'aliyuncs.com', 'alikunlun.com', 'alipay.com', 'alipayobjects.com', 'alipay.hk', 'antgroup.com',
+        'mybank.cn', 'mmstat.com', 'tbcdn.cn', 'taobaocdn.com', 'tanx.com', 'ykimg.com', 'youku.com',
+        'goofish.com', 'xianyu.com', 'cainiao.com', 'fliggy.com', 'amap.com', 'autonavi.com', 'dingtalk.com',
+        'alibabausercontent.com', 'aliapp.org', 'alibabadns.com',
+        // Pinduoduo
+        'pinduoduo.com', 'yangkeduo.com', 'pddpic.com', 'pddugc.com', 'pinduoduo.net', 'hutaojie.com',
+        // ByteDance / Doubao / Douyin
+        'doubao.com', 'volces.com', 'volcengine.com', 'volccdn.com', 'byteimg.com', 'bytedance.com',
+        'bytecdn.cn', 'bytedns.net', 'byteacctimg.com', 'bytegecko.com', 'bytednsdoc.com', 'douyin.com',
+        'douyinpic.com', 'douyinvod.com', 'douyincdn.com', 'snssdk.com', 'pstatp.com', 'toutiao.com',
+        'zijieapi.com', 'amemv.com', 'ibytedapm.com',
+        // Tencent / WeChat / QQ
+        'qq.com', 'wechat.com', 'weixin.com', 'weixinbridge.com', 'wechatpay.com', 'tenpay.com', 'gtimg.com',
+        'qpic.cn', 'qlogo.cn', 'myqcloud.com', 'tencent.com', 'tencent-cloud.net', 'tencentcs.com',
+        'servicewechat.com', 'wechatlegal.net', 'qcloud.com', 'idqqimg.com', 'tencentmusic.com',
+        // JD / Meituan / Ele.me / Didi / Xiaohongshu / Baidu / Bilibili / NetEase / divers
+        'jd.com', '360buyimg.com', 'jdpay.com', 'meituan.com', 'meituan.net', 'dianping.com', 'ele.me',
+        'didiglobal.com', 'didistatic.com', 'xiaohongshu.com', 'xhscdn.com', 'baidu.com', 'bdstatic.com',
+        'bdimg.com', 'bilibili.com', 'hdslb.com', 'biliapi.net', '163.com', '126.net', 'netease.com',
+        'unionpay.com', '95516.com', 'weibo.com', 'kuaishou.com', 'mi.com', 'xiaomi.com', 'hicloud.com',
+        'heytap.com',
       ],
     ),
     // The system's own services (updates, app store, push, cloud sync) are not filtered and move a lot of

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dartx/dartx.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -33,12 +35,25 @@ class AppListPage extends HookConsumerWidget with PresLogger {
 
   Future<Set<AppPackageInfo>> getApps(bool hideSystem) async {
     if (!PlatformUtils.isAndroid) return {};
+    // perso : sans icônes, la liste s'affiche tout de suite
     return (await InstalledApps.getInstalledApps(
       excludeSystemApps: hideSystem,
       excludeNonLaunchableApps: false,
+      withIcon: false,
+      detectPlatformType: false,
+    )).map((e) => AppPackageInfo(packageName: e.packageName, name: e.name, icon: null)).toSet();
+  }
+
+  /// perso : les icônes des applis utilisateur, en un seul appel en arrière-plan
+  Future<Map<String, Uint8List?>> getIcons() async {
+    if (!PlatformUtils.isAndroid) return {};
+    final apps = await InstalledApps.getInstalledApps(
+      excludeSystemApps: true,
+      excludeNonLaunchableApps: false,
       withIcon: true,
       detectPlatformType: false,
-    )).map((e) => AppPackageInfo(packageName: e.packageName, name: e.name, icon: e.icon)).toSet();
+    );
+    return {for (final a in apps) a.packageName: a.icon};
   }
 
   @override
@@ -50,12 +65,14 @@ class AppListPage extends HookConsumerWidget with PresLogger {
     final mode = ref.watch(Preferences.perAppProxyModeInUse);
     final selectedApps = ref.watch(AppListProvider(mode));
 
-    final hideSystemApps = useState(false);
+    final hideSystemApps = useState(true);
     final isSearching = useState(false);
     final searchQuery = useState("");
     final sortListener = useState(false);
 
     final asyncApps = useFuture(useMemoized(() => getApps(false)));
+    final asyncIcons = useFuture(useMemoized(() => getIcons()));
+    final icons = asyncIcons.data ?? const <String, Uint8List?>{};
     final asyncAppsHideSys = useFuture(useMemoized(() => getApps(true)));
 
     final asyncFilteredApps = hideSystemApps.value ? asyncAppsHideSys : asyncApps;
@@ -344,9 +361,9 @@ class AppListPage extends HookConsumerWidget with PresLogger {
               value: flag == null ? false : PkgFlag.checkboxValue(flag),
               tristate: true,
               onChanged: (_) => ref.read(AppListProvider(mode).notifier).updatePkg(package.packageName),
-              secondary: package.icon == null
-                  ? null
-                  : Image.memory(package.icon!, width: 48, height: 48, cacheWidth: 48, cacheHeight: 48),
+              secondary: icons[package.packageName] == null
+                  ? const SizedBox(width: 48, height: 48)
+                  : Image.memory(icons[package.packageName]!, width: 48, height: 48, cacheWidth: 48, cacheHeight: 48),
             );
           },
           itemCount: packages.length,

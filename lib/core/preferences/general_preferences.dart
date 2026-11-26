@@ -100,7 +100,7 @@ abstract class Preferences {
   // iOS only: kept in step with the native side, which applies it (see VPNManager.setAlwaysOn).
   static final alwaysOnVpn = PreferencesNotifier.create<bool, bool>("always_on_vpn", false);
 
-  static final perAppProxyEnabled = PreferencesNotifier.create<bool, bool>("per_app_proxy_enabled", false);
+  static final perAppProxyEnabled = PreferencesNotifier.create<bool, bool>("per_app_proxy_enabled", true);
 
   // Kept while App-based routing is off, for when it is turned on again.
   static final perAppProxyMode = PreferencesNotifier.create<AppProxyMode, String>(
@@ -117,7 +117,7 @@ abstract class Preferences {
 
   static final markNewProfileActive = PreferencesNotifier.create<bool, bool>("mark_new_profile_active", true);
 
-  static final dynamicNotification = PreferencesNotifier.create<bool, bool>("dynamic_notification", true);
+  static final dynamicNotification = PreferencesNotifier.create<bool, bool>("dynamic_notification", false);
 
   static final autoCheckIp = PreferencesNotifier.create<bool, bool>("auto_check_ip", true);
 

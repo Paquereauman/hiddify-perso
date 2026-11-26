@@ -39,14 +39,15 @@ abstract class ConfigOptions {
 
   static final defaultProxy = PreferencesNotifier.create<DefaultProxy, String>(
     "default-proxy",
-    DefaultProxy.balance,
+    // perso : toujours le serveur le plus rapide (url-test), bascule douce
+    DefaultProxy.lowest,
     mapFrom: (value) => DefaultProxy.values.firstWhere((e) => e.key == value, orElse: () => DefaultProxy.balance),
     mapTo: (value) => value.key,
   );
 
   static final region = PreferencesNotifier.create<Region, String>(
     "region",
-    Region.other,
+    Region.cn,
     mapFrom: Region.values.byName,
     mapTo: (value) => value.name,
   );
@@ -98,6 +99,8 @@ abstract class ConfigOptions {
     possibleValues: List.of([
       "local",
       "udp://223.5.5.5",
+      "https://223.5.5.5/dns-query",
+      "udp://119.29.29.29",
       "udp://1.1.1.1",
       "udp://1.1.1.2",
       "tcp://1.1.1.1",
@@ -157,7 +160,8 @@ abstract class ConfigOptions {
 
   static final connectionTestUrl = PreferencesNotifier.create<String, String>(
     "connection-test-url",
-    "http://captive.apple.com/hotspot-detect.html",
+    // perso : bloqué en Chine en direct, donc mesure vraiment le serveur VPN
+    "https://www.gstatic.com/generate_204",
     possibleValues: List.of([
       "http://connectivitycheck.gstatic.com/generate_204",
       "http://www.gstatic.com/generate_204",
@@ -175,7 +179,8 @@ abstract class ConfigOptions {
 
   static final urlTestInterval = PreferencesNotifier.create<Duration, int>(
     "url-test-interval",
-    const Duration(minutes: 10),
+    // perso : moins de tests = moins de batterie
+    const Duration(minutes: 15),
     mapFrom: const IntervalInSecondsConverter().fromJson,
     mapTo: const IntervalInSecondsConverter().toJson,
   );

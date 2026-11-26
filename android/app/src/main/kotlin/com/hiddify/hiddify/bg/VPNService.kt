@@ -161,6 +161,25 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
                 while (inet6RouteExcludeAddress.hasNext()) {
                     builder.excludeRoute(inet6RouteExcludeAddress.next().toIpPrefix())
                 }
+
+                // perso : le réseau local ne passe jamais dans le tunnel (KDE Connect, imprimantes, NAS…)
+                for ((addr, prefix) in listOf(
+                    "10.0.0.0" to 8, "172.16.0.0" to 12, "192.168.0.0" to 16, "169.254.0.0" to 16,
+                    "224.0.0.0" to 4, "255.255.255.255" to 32,
+                )) {
+                    try {
+                        builder.excludeRoute(android.net.IpPrefix(java.net.InetAddress.getByName(addr), prefix))
+                    } catch (e: Exception) {
+                        Log.w("VpnService", "excludeRoute $addr/$prefix: $e")
+                    }
+                }
+                for ((addr, prefix) in listOf("fe80::" to 10, "fc00::" to 7, "ff00::" to 8)) {
+                    try {
+                        builder.excludeRoute(android.net.IpPrefix(java.net.InetAddress.getByName(addr), prefix))
+                    } catch (e: Exception) {
+                        Log.w("VpnService", "excludeRoute $addr/$prefix: $e")
+                    }
+                }
             } else {
                 val inet4RouteAddress = options.inet4RouteRange
                 if (inet4RouteAddress.hasNext()) {

@@ -1,5 +1,8 @@
 allprojects {
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         mavenCentral()
         google()
     }
@@ -17,4 +20,27 @@ subprojects {
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
+}
+
+// perso : redirige les dépôts Google/Maven Central vers les miroirs Aliyun (réseau chinois)
+def perso_mirror = { RepositoryHandler repos ->
+    repos.withType(MavenArtifactRepository).configureEach { r ->
+        def u = r.url.toString()
+        if (u.contains('dl.google.com') || u.contains('maven.google.com')) {
+            r.url = 'https://maven.aliyun.com/repository/google'
+        } else if (u.contains('repo.maven.apache.org') || u.contains('repo1.maven.org')) {
+            r.url = 'https://maven.aliyun.com/repository/central'
+        } else if (u.contains('plugins.gradle.org')) {
+            r.url = 'https://maven.aliyun.com/repository/gradle-plugin'
+        }
+    }
+}
+def perso_backup = { RepositoryHandler repos ->
+    def loc = repos.maven { url = new File(rootProject.rootDir, '../../m2local').toURI() }
+    repos.remove(loc); repos.addFirst(loc)
+    repos.maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public' }
+}
+allprojects {
+    perso_mirror(repositories); perso_backup(repositories)
+    buildscript { perso_mirror(repositories); perso_backup(repositories) }
 }

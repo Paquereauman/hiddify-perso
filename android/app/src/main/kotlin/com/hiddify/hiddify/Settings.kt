@@ -30,10 +30,32 @@ object Settings {
     val perAppProxyEnabled: Boolean
         get() = preferences.getBoolean(
             SettingsKey.PER_APP_PROXY_ENABLED,
-            preferences.getString(SettingsKey.PER_APP_PROXY_MODE, PerAppProxyMode.OFF) != PerAppProxyMode.OFF
+            // perso : activé par défaut (la valeur par défaut côté Dart n'est pas enregistrée)
+            preferences.getString(SettingsKey.PER_APP_PROXY_MODE, PerAppProxyMode.EXCLUDE) != PerAppProxyMode.OFF
         )
 
+    // perso : applis qui ne passent jamais par le VPN quand aucune liste n'a été enregistrée
+    private val chinaDirectApps = listOf(
+        "com.eg.android.AlipayGphone", "hk.alipay.wallet", "com.tencent.mm", "com.tencent.mobileqq",
+        "com.tencent.wework", "com.taobao.taobao", "com.taobao.litetao", "com.tmall.wireless",
+        "com.taobao.idlefish", "com.cainiao.wireless", "com.taobao.trip", "com.xunmeng.pinduoduo",
+        "com.larus.nova", "com.aitutor.hippo", "com.sinovatech.unicom.ui", "com.ss.android.ugc.aweme", "com.ss.android.lark", "org.kde.kdeconnect_tp",
+        "com.jingdong.app.mall", "com.sankuai.meituan", "com.sankuai.meituan.takeoutnew", "me.ele",
+        "com.dianping.v1", "com.sdu.didi.psnger", "com.xingin.xhs", "com.autonavi.minimap",
+        "com.baidu.BaiduMap", "com.alibaba.android.rimet", "com.unionpay", "com.MobileTicket",
+        "tv.danmaku.bili", "com.netease.cloudmusic", "com.tencent.qqmusic", "com.sina.weibo",
+        "com.smile.gifmaker", "com.tencent.map", "com.icbc", "cmb.pb", "com.chinamworld.main",
+        "com.android.bankabc", "com.chinamworld.bocmbci",
+    )
+
     val perAppProxyList: List<String>
+        get() {
+            val saved = perAppProxyListSaved.filter { it.isNotBlank() }
+            if (saved.isEmpty() && perAppProxyMode != PerAppProxyMode.INCLUDE) return chinaDirectApps
+            return saved
+        }
+
+    private val perAppProxyListSaved: List<String>
         get() {
             val stringValue = if (perAppProxyMode == PerAppProxyMode.INCLUDE) {
                 preferences.getString(SettingsKey.PER_APP_PROXY_INCLUDE_LIST, "")!!

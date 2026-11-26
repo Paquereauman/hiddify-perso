@@ -8,6 +8,51 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 enum AutoSelectionResult { success, failure, notFound }
 
+/// perso : applis qui ne passent jamais par le VPN (seules celles installées sont prises en compte).
+const chinaDirectApps = <String>{
+  'com.eg.android.AlipayGphone', // Alipay
+  'hk.alipay.wallet', // AlipayHK
+  'com.tencent.mm', // WeChat
+  'com.tencent.mobileqq', // QQ
+  'com.tencent.wework', // WeCom
+  'com.taobao.taobao', // Taobao
+  'com.taobao.litetao', // Taobao Lite
+  'com.tmall.wireless', // Tmall
+  'com.taobao.idlefish', // Xianyu
+  'com.cainiao.wireless', // Cainiao
+  'com.taobao.trip', // Fliggy
+  'com.xunmeng.pinduoduo', // Pinduoduo
+  'com.larus.nova', // Doubao
+  'com.aitutor.hippo', // 豆包爱学
+  'com.sinovatech.unicom.ui', // China Unicom
+  'com.ss.android.ugc.aweme', // Douyin
+  'com.ss.android.lark', // Feishu
+  'org.kde.kdeconnect_tp', // KDE Connect
+  'com.jingdong.app.mall', // JD
+  'com.sankuai.meituan', // Meituan
+  'com.sankuai.meituan.takeoutnew', // Meituan Waimai
+  'me.ele', // Ele.me
+  'com.dianping.v1', // Dianping
+  'com.sdu.didi.psnger', // DiDi
+  'com.xingin.xhs', // Xiaohongshu
+  'com.autonavi.minimap', // Amap
+  'com.baidu.BaiduMap', // Baidu Maps
+  'com.alibaba.android.rimet', // DingTalk
+  'com.unionpay', // UnionPay
+  'com.MobileTicket', // 12306
+  'tv.danmaku.bili', // Bilibili
+  'com.netease.cloudmusic', // NetEase Music
+  'com.tencent.qqmusic', // QQ Music
+  'com.sina.weibo', // Weibo
+  'com.smile.gifmaker', // Kuaishou
+  'com.tencent.map', // Tencent Maps
+  'com.icbc', // ICBC
+  'cmb.pb', // China Merchants Bank
+  'com.chinamworld.main', // CCB
+  'com.android.bankabc', // ABC
+  'com.chinamworld.bocmbci', // BOC
+};
+
 abstract interface class AutoSelectionRepository {
   Future<(Set<String>?, AutoSelectionResult)> getByAppProxyMode({required AppProxyMode mode, required Region region});
 }
@@ -22,6 +67,11 @@ class AutoSelectionRepositoryImpl with AppLogger implements AutoSelectionReposit
     required AppProxyMode mode,
     required Region region,
   }) async {
+    // perso : en Chine + mode Exclure, la liste distante (direct_cn) est vide et GitHub est souvent
+    // bloqué : on utilise la liste intégrée des applis qui passent en direct.
+    if (region == Region.cn && mode == AppProxyMode.exclude) {
+      return (chinaDirectApps, AutoSelectionResult.success);
+    }
     try {
       final rs = await _getHttp().get(_genUrl(mode, region));
       if (rs.statusCode == 200) {

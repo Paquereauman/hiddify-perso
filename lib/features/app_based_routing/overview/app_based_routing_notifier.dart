@@ -93,7 +93,12 @@ class AppBasedRouting extends _$AppBasedRouting with AppLogger {
 
   Future<void> _autoSelectionUpdate() async {
     final mode = _mode;
-    if (!_autoOn || mode == null) return;
+    if (mode == null) return;
+    // perso : au premier lancement (routage par appli actif par défaut), la liste intégrée s'applique seule
+    if (!_autoOn) {
+      if (_autoFollows) await _loading(() => _applyAutoSelection(mode));
+      return;
+    }
     final lastUpdate = ref.read(Preferences.autoAppsSelectionLastUpdate);
     if (lastUpdate != null && DateTime.now().difference(lastUpdate) < const Duration(days: 1)) return;
     await _loading(() => _applyAutoSelection(mode));

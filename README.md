@@ -1,3 +1,59 @@
+# Hiddify Perso — a China-tuned build of Hiddify for Android
+
+> **This is a personal fork of [hiddify/hiddify-app](https://github.com/hiddify/hiddify-app)**, released under the same
+> [Hiddify Extended GPL v3](LICENSE.md) (non-commercial). All credit for the app goes to the Hiddify team.
+> It is not published on any app store. The original README follows below.
+
+Hiddify Perso changes the defaults so the app works well **out of the box from mainland China**: Chinese apps and sites
+stay direct, the local network stays reachable while the VPN is on, and the app picks the fastest server by itself.
+It accepts the same links as Hiddify: VLESS / Reality, Hysteria2, Shadowsocks, Trojan, Clash and sing-box subscriptions.
+
+## Changes from upstream
+
+**Routing for China**
+- Region defaults to **China**, with the direct DNS on AliDNS (`223.5.5.5`). More Chinese DNS servers are in the list.
+- New built-in rule **"China direct"**: a list of domain suffixes (`.cn`, Taobao/Tmall/Alipay, Pinduoduo, Doubao/ByteDance,
+  WeChat/QQ/Tencent, JD, Meituan, Baidu, Bilibili, NetEase…). It works without downloading rule sets from GitHub, which
+  is often blocked in China.
+- **App-based routing is on by default, in "bypass" mode**, with a built-in list of about 40 Chinese apps (Alipay, WeChat,
+  Taobao, Pinduoduo, Doubao, JD, Meituan, DiDi, banks…) plus KDE Connect. Only installed apps are used, and the list can
+  be edited in the app.
+- Fix: the Android VPN service now applies app-based routing on a fresh install too (the Dart default was never saved,
+  so the native side used to treat the feature as off).
+
+**Local network**
+- On Android 13+, private ranges (`10/8`, `172.16/12`, `192.168/16`, link-local, multicast, broadcast) are excluded from
+  the tunnel itself, so LAN apps such as KDE Connect, printers or a NAS keep working with the VPN on.
+
+**Server testing and switching**
+- Default proxy is **lowest latency** (url-test) instead of round-robin, so the app stays on one fast server.
+- The connection test uses `https://www.gstatic.com/generate_204`, which is blocked in China without a proxy: a server
+  only ranks high if it really gets through.
+
+**Battery**
+- URL test every 15 minutes instead of 10.
+- The live speed notification is off by default, so the phone is not woken up every second.
+
+**Interface**
+- First run skips region detection: China region and French interface.
+- The app-based routing page opens instantly: apps are listed without icons, and the icons load in one background call.
+  System apps are hidden by default.
+
+**Packaging**
+- Application id `app.hiddify.perso` and label "Hiddify Perso", so it installs next to the official app.
+
+## Building (from mainland China)
+
+Same as upstream (`flutter build apk --release --target lib/main_prod.dart`), with these tweaks already in this branch:
+- Gradle repositories are redirected to the Aliyun / Tencent Maven mirrors, and a local Maven folder
+  (`../../m2local`, next to the repository) is checked first for artifacts that Java cannot download.
+- Network retries and TLS 1.2 are set in `android/gradle.properties`.
+- Use `FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn` for the Flutter engine artifacts.
+
+Signing uses your own `android/key.properties` (not in the repository).
+
+---
+
 <div dir="ltr" align=center>
 
 [**فارسی 🇮🇷**](README_fa.md) / [**Русский 🇷🇺**](README_ru.md) / [**简体中文 🇨🇳**](README_cn.md) / [**日本語 🇯🇵**](README_ja.md) / [**Português-BR 🇧🇷**](README_br.md)

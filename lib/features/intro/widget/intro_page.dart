@@ -252,6 +252,13 @@ class IntroPage extends HookConsumerWidget with PresLogger {
   }
 
   Future<void> autoSelectRegion(WidgetRef ref) async {
+    // Version perso : toujours Chine + interface en français, sans détection.
+    if (!_regionChosenByUser) {
+      await _setRegion(ref, Region.cn);
+      await ref.read(localePreferencesProvider.notifier).changeLocale(AppLocale.fr);
+    }
+    return;
+    // ignore: dead_code
     try {
       final countryCode = RegionDetector.detect();
       final regionLocale = _getRegionLocale(countryCode);
