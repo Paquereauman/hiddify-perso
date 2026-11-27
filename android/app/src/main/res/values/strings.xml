@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="stop">Stop</string>
-    <string name="quick_toggle">Toggle</string>
+    <string name="quick_toggle">PandaVPN</string>
     <string name="status_starting">Connecting…</string>
     <string name="status_started">Connected</string>
     <string name="mode_vpn">VPN</string>

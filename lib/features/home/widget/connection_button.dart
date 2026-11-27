@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
@@ -128,12 +129,12 @@ class ConnectionButton extends HookConsumerWidget {
       buttonColor: switch (look) {
         _Look.connected when degraded => _degradedColor,
         // the traffic waits for the chain hop: still on its way
-        _Look.connected when hopPending => const Color(0xFF455FE9),
+        _Look.connected when hopPending => const Color(0xFFF5A623),
         _Look.connected => buttonTheme.connectedColor!,
         _Look.noProxies => const Color.fromARGB(255, 185, 176, 103),
         _Look.failed => Colors.red,
         // the logo's own blue while the connection is on its way
-        _Look.connecting || _Look.waiting || _Look.hotReloading || _Look.disconnecting => const Color(0xFF455FE9),
+        _Look.connecting || _Look.waiting || _Look.hotReloading || _Look.disconnecting => const Color(0xFFF5A623),
         _ => buttonTheme.idleColor!,
       },
       image: switch (look) {
@@ -457,7 +458,7 @@ class _ConnectionButton extends HookWidget {
                                     // in steps, so it repaints only when the traffic changes a lot
                                     traffic: still || flowStill ? _stepped(target) : light.traffic,
                                     dark: theme.brightness == Brightness.dark,
-                                    drawLogo: !useImage,
+                                    drawLogo: false, // perso : le panda remplace le logo
                                     logoOpacity: look == _Look.loading ? .38 : 1,
                                     pixelRatio: MediaQuery.devicePixelRatioOf(context),
                                     simple: still || flowStill,
@@ -481,7 +482,30 @@ class _ConnectionButton extends HookWidget {
                           hoverColor: Colors.black.withValues(alpha: .05),
                           highlightColor: Colors.black.withValues(alpha: .06),
                           splashColor: Colors.black.withValues(alpha: .08),
-                          child: useImage ? Padding(padding: const EdgeInsets.all(36), child: image.image()) : null,
+                          // perso : visage du panda selon l'état (endormi, clin d'œil, réveillé)
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 350),
+                            curve: Curves.easeOutCubic,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                center: const Alignment(0, -.25),
+                                radius: .95,
+                                colors: _faceColors(look, theme.brightness == Brightness.dark),
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(8),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: SvgPicture.asset(
+                                _pandaFor(look),
+                                key: ValueKey(_pandaFor(look)),
+                                colorFilter: look == _Look.loading
+                                    ? const ColorFilter.mode(Color(0x99FFFFFF), BlendMode.modulate)
+                                    : null,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                       Positioned.fill(
@@ -534,7 +558,7 @@ class _ConnectionButton extends HookWidget {
         Gap(24 * scale),
         Column(
           children: [
-            AnimatedText(label, style: theme.textTheme.titleMedium),
+            AnimatedText(label, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
             AnimatedSwitcher(
               layoutBuilder: uniqueKeysLayout(),
               duration: const Duration(milliseconds: 250),
@@ -721,3 +745,21 @@ class _ChainBadge extends StatelessWidget {
     );
   }
 }
+
+
+/// perso : le visage du panda pour chaque état du bouton.
+String _pandaFor(_Look look) => switch (look) {
+  _Look.connected || _Look.noProxies || _Look.hotReloading => 'assets/images/panda_on.svg',
+  _Look.connecting || _Look.waiting || _Look.disconnecting || _Look.loading => 'assets/images/panda_wait.svg',
+  _ => 'assets/images/panda_off.svg',
+};
+
+/// perso : couleurs de la face du bouton (centre → bord), proposées par Gemini.
+List<Color> _faceColors(_Look look, bool dark) => switch (look) {
+  _Look.connected || _Look.noProxies || _Look.hotReloading =>
+    dark ? const [Color(0xFF2BAE62), Color(0xFF1B7A43)] : const [Color(0xFF28A75E), Color(0xFF19733F)],
+  _Look.connecting || _Look.waiting || _Look.disconnecting =>
+    dark ? const [Color(0xFFDF8A24), Color(0xFFB36214)] : const [Color(0xFFE8962E), Color(0xFFC47119)],
+  _Look.failed => dark ? const [Color(0xFFD65A5A), Color(0xFF9E3535)] : const [Color(0xFFDE6464), Color(0xFFB04141)],
+  _ => dark ? const [Color(0xFF2C594B), Color(0xFF1F4037)] : const [Color(0xFF4B7F6E), Color(0xFF335E50)],
+};

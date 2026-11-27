@@ -498,7 +498,8 @@ class _PinnedOptions extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _MenuOption(
+        // perso : stratégie de Balancer inutile en mode « plus rapide »
+        if (false) _MenuOption(
           title: routing.balancerStrategy.title,
           selected: ref.watch(ConfigOptions.balancerStrategy),
           choices: BalancerStrategy.values,
@@ -506,7 +507,7 @@ class _PinnedOptions extends ConsumerWidget {
           onSelected: ref.read(ConfigOptions.balancerStrategy.notifier).update,
           describe: (value) => value.describe(t),
         ),
-        divider,
+        if (false) divider,
         _MenuOption(
           title: routing.defaultProxy.title,
           selected: ref.watch(ConfigOptions.defaultProxy),

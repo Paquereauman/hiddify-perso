@@ -26,9 +26,9 @@ class GeneralPage extends HookConsumerWidget {
       appBar: AppBar(title: Text(t.pages.settings.general.title)),
       body: ListView(
         children: [
-          const LocalePrefTile(),
-          const ThemeModePrefTile(),
-          const EnableAnalyticsPrefTile(),
+          // perso : langue et thème masqués (français, thème du système)
+          // perso : pas d'envoi de statistiques
+          if (false) // perso : masqué
           SwitchListTile.adaptive(
             title: Text(t.pages.settings.general.reduceAnimations),
             subtitle: Text(t.pages.settings.general.reduceAnimationsMsg),
@@ -36,13 +36,14 @@ class GeneralPage extends HookConsumerWidget {
             value: ref.watch(Preferences.reduceAnimations),
             onChanged: ref.read(Preferences.reduceAnimations.notifier).update,
           ),
+          if (false) // perso : masqué
           SwitchListTile.adaptive(
             title: Text(t.pages.settings.general.autoIpCheck),
             value: ref.watch(Preferences.autoCheckIp),
             secondary: const Icon(Icons.flag_rounded),
             onChanged: ref.read(Preferences.autoCheckIp.notifier).update,
           ),
-          if (PlatformUtils.isAndroid) ...[
+          if (false) ...[ // perso : vitesse dans la notification et vibrations masquées
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.dynamicNotification),
               secondary: const Icon(Icons.speed_rounded),
@@ -85,7 +86,7 @@ class GeneralPage extends HookConsumerWidget {
           ],
           if (PlatformUtils.isAndroid) const BatteryOptimizationWidget(),
           // iOS ends a VPN that outgrows its memory budget: the limit is always on there
-          if (!PlatformUtils.isIOS)
+          if (false) // perso : limite mémoire masquée
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.memoryLimit),
               subtitle: Text(t.pages.settings.general.memoryLimitMsg),
@@ -96,6 +97,7 @@ class GeneralPage extends HookConsumerWidget {
           // Debug mode and log level moved to the Logs page. Both decide how
           // much is recorded, which is only meaningful next to the logs
           // themselves — and next to the filters that decide what is shown.
+          if (false) // perso : URL de test fixée (gstatic)
           ValuePreferenceWidget(
             value: ref.watch(ConfigOptions.connectionTestUrl),
             preferences: ref.watch(ConfigOptions.connectionTestUrl.notifier),
@@ -142,6 +144,7 @@ class GeneralPage extends HookConsumerWidget {
             leading: const Icon(Icons.speed_rounded),
             onTap: () => ref.read(dialogNotifierProvider.notifier).showSpeedTest(start: false),
           ),
+          if (false) // perso : masqué
           ValuePreferenceWidget(
             value: ref.watch(ConfigOptions.clashApiPort),
             preferences: ref.watch(ConfigOptions.clashApiPort.notifier),

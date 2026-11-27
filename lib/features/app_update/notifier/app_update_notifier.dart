@@ -47,6 +47,10 @@ class AppUpdateNotifier extends _$AppUpdateNotifier with AppLogger {
   );
 
   Future<AppUpdateState> check() async {
+    // perso : PandaVPN ne se met pas à jour depuis les versions officielles de Hiddify (autre appli,
+    // autre signature) : on passe par le script de fusion du dépôt.
+    return state = const AppUpdateState.disabled();
+    // ignore: dead_code
     loggy.debug("checking for update");
     state = const AppUpdateState.checking();
     final appInfo = ref.read(appInfoProvider).requireValue;
@@ -94,6 +98,8 @@ class AppUpdateNotifier extends _$AppUpdateNotifier with AppLogger {
   /// Outside a store, at most once a day: the release this copy can update to, when there is one
   /// the user did not ignore.
   Future<RemoteVersionEntity?> checkOnStart() async {
+    return null; // perso : pas de vérification au démarrage
+    // ignore: dead_code
     if (!ref.read(appInfoProvider).requireValue.release.allowCustomUpdateChecker) return null;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - _lastCheckPref.read() < const Duration(days: 1).inMilliseconds) return null;

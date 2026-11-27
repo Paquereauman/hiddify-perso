@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "PandaVPN",
     "start": "Commencer",
     "version": "Version",
     "ok": "OK",
@@ -449,7 +449,7 @@
         "speedTest": "Test de débit"
       },
       "routing": {
-        "title": "Routage",
+        "title": "Routage et applications",
         "routeRule": {
           "add": "Ajouter une règle",
           "delete": "Supprimer la règle",

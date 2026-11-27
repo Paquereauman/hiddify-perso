@@ -20,6 +20,12 @@ class NavBar extends ConsumerWidget {
       padding: const EdgeInsets.all(
         AddProfileModalConst.navBarGap,
       ).copyWith(bottom: AddProfileModalConst.navBarBottomGap),
+      // perso : profils gratuits (WARP/Psiphon) et aide masqués
+      child: const SizedBox.shrink(),
+    );
+    // ignore: dead_code
+    return Padding(
+      padding: EdgeInsets.zero,
       child: Row(
         children: [
           Row(

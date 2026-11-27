@@ -1,56 +1,69 @@
-# Hiddify Perso — a China-tuned build of Hiddify for Android
+<p align="center"><img src="assets/images/logo.svg" width="120" alt="PandaVPN logo"></p>
 
-> **This is a personal fork of [hiddify/hiddify-app](https://github.com/hiddify/hiddify-app)**, released under the same
-> [Hiddify Extended GPL v3](LICENSE.md) (non-commercial). All credit for the app goes to the Hiddify team.
-> It is not published on any app store. The original README follows below.
+<h1 align="center">PandaVPN</h1>
 
-Hiddify Perso changes the defaults so the app works well **out of the box from mainland China**: Chinese apps and sites
-stay direct, the local network stays reachable while the VPN is on, and the app picks the fastest server by itself.
-It accepts the same links as Hiddify: VLESS / Reality, Hysteria2, Shadowsocks, Trojan, Clash and sing-box subscriptions.
+<p align="center"><b>A simple, China-tuned Android VPN client — a personal fork of <a href="https://github.com/hiddify/hiddify-app">Hiddify</a>.</b><br>
+Chinese apps and sites stay direct, your local network keeps working, and the fastest server is picked for you.</p>
 
-## Changes from upstream
+<p align="center">
+  <img src="docs/pandavpn/home.png" width="49%" alt="Home screen">
+  <img src="docs/pandavpn/settings.png" width="49%" alt="Settings">
+</p>
+<p align="center">
+  <img src="docs/pandavpn/general.png" width="49%" alt="General settings">
+  <img src="docs/pandavpn/about.png" width="49%" alt="About">
+</p>
 
-**Routing for China**
-- Region defaults to **China**, with the direct DNS on AliDNS (`223.5.5.5`). More Chinese DNS servers are in the list.
-- New built-in rule **"China direct"**: a list of domain suffixes (`.cn`, Taobao/Tmall/Alipay, Pinduoduo, Doubao/ByteDance,
-  WeChat/QQ/Tencent, JD, Meituan, Baidu, Bilibili, NetEase…). It works without downloading rule sets from GitHub, which
-  is often blocked in China.
-- **App-based routing is on by default, in "bypass" mode**, with a built-in list of about 40 Chinese apps (Alipay, WeChat,
-  Taobao, Pinduoduo, Doubao, JD, Meituan, DiDi, banks…) plus KDE Connect. Only installed apps are used, and the list can
-  be edited in the app.
-- Fix: the Android VPN service now applies app-based routing on a fresh install too (the Dart default was never saved,
-  so the native side used to treat the feature as off).
+> **Personal, non-commercial fork** of [hiddify/hiddify-app](https://github.com/hiddify/hiddify-app), under the same
+> [Hiddify Extended GPL v3](LICENSE.md). All credit for the app and its engine goes to the Hiddify team.
+> Not published on any app store. Not affiliated with any commercial service named "Panda VPN".
+> The original Hiddify README follows below.
 
-**Local network**
-- On Android 13+, private ranges (`10/8`, `172.16/12`, `192.168/16`, link-local, multicast, broadcast) are excluded from
-  the tunnel itself, so LAN apps such as KDE Connect, printers or a NAS keep working with the VPN on.
+## What it does
 
-**Server testing and switching**
-- Default proxy is **lowest latency** (url-test) instead of round-robin, so the app stays on one fast server.
-- The connection test uses `https://www.gstatic.com/generate_204`, which is blocked in China without a proxy: a server
-  only ranks high if it really gets through.
+- **Imports what you already have**: VLESS / Reality, Hysteria2, Shadowsocks, Trojan links, Clash and sing-box
+  subscriptions (clipboard, file or QR code).
+- **One big button**: a panda that sleeps when you are disconnected, winks while connecting and wakes up when you are
+  protected.
+- **Fastest server automatically**: lowest-latency mode by default, tested every 15 minutes against
+  `gstatic.com/generate_204` (blocked in China without a proxy, so only servers that really get through rank high).
+- **China direct**: region China by default, AliDNS for direct DNS, and a built-in "China direct" rule (`.cn`, Taobao,
+  Tmall, Alipay, Pinduoduo, Doubao/ByteDance, WeChat/QQ, JD, Meituan, Baidu, Bilibili…) that works without downloading
+  rule sets from GitHub.
+- **Apps that skip the VPN**: per-app routing is on by default in bypass mode, with a built-in list of about 40 Chinese
+  apps (Alipay, WeChat, Taobao, Pinduoduo, Doubao, banks…) plus KDE Connect. Edit it in *Routing & apps*.
+- **Local network outside the tunnel** (Android 13+): LAN ranges, multicast and broadcast never enter the VPN, so KDE
+  Connect, printers or a NAS keep working.
+- **Error journal**: *Settings → Error journal* collects warnings and errors from this session, earlier sessions and
+  the VPN engine, ready to **copy** or **send as a .txt file** in one tap.
+- **Lighter on battery**: no live speed notification, fewer background tests.
+- **Simpler UI**: two tabs, essential settings first, everything else folded under *Advanced*; no free WARP/Psiphon
+  profiles, no beta channel, no telemetry toggle.
 
-**Battery**
-- URL test every 15 minutes instead of 10.
-- The live speed notification is off by default, so the phone is not woken up every second.
+## Changes from upstream Hiddify
 
-**Interface**
-- First run skips region detection: China region and French interface.
-- The app-based routing page opens instantly: apps are listed without icons, and the icons load in one background call.
-  System apps are hidden by default.
+| Area | Change |
+|---|---|
+| Branding | Name **PandaVPN**, panda icon, splash and notification icon, bamboo-green theme. App id stays `app.hiddify.perso`. |
+| Home | Panda connect button with a coloured face per state; no world map, no version badge, no quick-settings tab. |
+| Routing | China region, China-direct rule, per-app bypass on by default (also enforced by the native VPN service), LAN excluded from the tunnel. |
+| Servers | Lowest latency by default; balancer strategy hidden. |
+| Settings | Routing & apps, General (battery, test interval, speed test), Error journal, Advanced (DNS, chain, inbound, TLS tricks, logs). |
+| Updates | In-app update check against official Hiddify releases is disabled; upstream releases are merged with a script (below). |
+| Build | Aliyun/Tencent Maven mirrors, a local Maven folder, retries and TLS 1.2 for building from mainland China. |
 
-**Packaging**
-- Application id `app.hiddify.perso` and label "Hiddify Perso", so it installs next to the official app.
+## Staying up to date with Hiddify
 
-## Building (from mainland China)
+All PandaVPN changes live in their own commits on top of an upstream Hiddify version (`.perso-base` next to the
+repository). `mettre-a-jour-hiddify.ps1` looks for the newest **stable** Hiddify tag (never betas), replays the
+PandaVPN commits on top of it, rebuilds and installs the APK. If upstream touched the same lines, it stops and restores
+the branch, so nothing is lost.
 
-Same as upstream (`flutter build apk --release --target lib/main_prod.dart`), with these tweaks already in this branch:
-- Gradle repositories are redirected to the Aliyun / Tencent Maven mirrors, and a local Maven folder
-  (`../../m2local`, next to the repository) is checked first for artifacts that Java cannot download.
-- Network retries and TLS 1.2 are set in `android/gradle.properties`.
-- Use `FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn` for the Flutter engine artifacts.
+## Building
 
-Signing uses your own `android/key.properties` (not in the repository).
+`flutter build apk --release --target lib/main_prod.dart --target-platform android-arm64` (Flutter 3.38.5). From
+mainland China, also set `FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn`. Signing uses your own
+`android/key.properties` (not in the repository).
 
 ---
 

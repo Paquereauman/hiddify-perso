@@ -1,5 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:hiddify/features/log/overview/error_journal_page.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
@@ -113,47 +114,26 @@ class AboutPage extends HookConsumerWidget {
             ),
           ),
           SliverList(
+            // perso : PandaVPN, l'essentiel seulement
             delegate: SliverChildListDelegate([
-              ...conditionalTiles,
-              if (conditionalTiles.isNotEmpty) const Divider(),
               ListTile(
-                title: Text(t.pages.about.reportProblem),
-                subtitle: Text(t.pages.about.reportProblemMsg),
-                trailing: const Icon(FluentIcons.chat_warning_24_regular),
-                onTap: () async {
-                  await ref.read(dialogNotifierProvider.notifier).showReportProblem();
-                },
+                leading: const Icon(Icons.bug_report_outlined),
+                title: const Text('Journal d\'erreurs'),
+                subtitle: const Text('Copier ou envoyer en .txt'),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ErrorJournalPage())),
               ),
               ListTile(
-                title: Text(t.pages.about.sourceCode),
+                leading: const Icon(Icons.code_rounded),
+                title: const Text('Code source de PandaVPN'),
                 trailing: const Icon(FluentIcons.open_24_regular),
-                onTap: () async {
-                  await UriUtils.tryLaunch(Uri.parse(Constants.githubUrl));
-                },
+                onTap: () async => UriUtils.tryLaunch(Uri.parse('https://github.com/Paquereauman/hiddify-perso')),
               ),
               ListTile(
-                title: Text(t.pages.about.telegramChannel),
+                leading: const Icon(Icons.favorite_border_rounded),
+                title: const Text('Basé sur Hiddify'),
+                subtitle: const Text('Licence GPL v3 étendue Hiddify'),
                 trailing: const Icon(FluentIcons.open_24_regular),
-                onTap: () async {
-                  await UriUtils.tryLaunchAppOrWeb(
-                    Uri.parse(Constants.telegramChannelAppUrl),
-                    Uri.parse(Constants.telegramChannelUrl),
-                  );
-                },
-              ),
-              ListTile(
-                title: Text(t.pages.about.termsAndConditions),
-                trailing: const Icon(FluentIcons.open_24_regular),
-                onTap: () async {
-                  await UriUtils.tryLaunch(Uri.parse(Constants.termsAndConditionsUrl));
-                },
-              ),
-              ListTile(
-                title: Text(t.pages.about.privacyPolicy),
-                trailing: const Icon(FluentIcons.open_24_regular),
-                onTap: () async {
-                  await UriUtils.tryLaunch(Uri.parse(Constants.privacyPolicyUrl));
-                },
+                onTap: () async => UriUtils.tryLaunch(Uri.parse('https://github.com/hiddify/hiddify-app')),
               ),
             ]),
           ),

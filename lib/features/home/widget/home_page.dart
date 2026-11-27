@@ -41,8 +41,6 @@ class HomePage extends HookConsumerWidget {
               TextSpan(
                 children: [
                   TextSpan(text: t.common.appTitle),
-                  const TextSpan(text: " "),
-                  const WidgetSpan(child: AppVersionLabel(), alignment: PlaceholderAlignment.middle),
                 ],
               ),
             ),
@@ -77,47 +75,8 @@ class HomePage extends HookConsumerWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          RepaintBoundary(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                // A sky behind the connect button, as at an eclipse: in dark mode a touch lighter round
-                // the button, fading to the theme's own dark; in light mode brightest there, a touch
-                // darker towards the edges. Both barely there, centred on where the button sits.
-                gradient: theme.brightness == Brightness.dark
-                    ? RadialGradient(
-                        center: const Alignment(0, -.15),
-                        radius: .85,
-                        colors: [
-                          Colors.white.withValues(alpha: .045),
-                          Colors.white.withValues(alpha: .015),
-                          Colors.white.withValues(alpha: 0),
-                        ],
-                        stops: const [0, .45, 1],
-                      )
-                    : RadialGradient(
-                        center: const Alignment(0, -.15),
-                        radius: 1.1,
-                        colors: [
-                          Colors.white.withValues(alpha: .55),
-                          Colors.white.withValues(alpha: 0),
-                          Colors.black.withValues(alpha: .045),
-                        ],
-                        stops: const [0, .5, 1],
-                      ),
-                image: DecorationImage(
-                  image: const AssetImage('assets/images/world_map.png'), // Replace with your image path
-                  fit: BoxFit.cover,
-                  opacity: 0.09,
-                  colorFilter: theme.brightness == Brightness.dark
-                      ? ColorFilter.mode(Colors.white.withValues(alpha: .15), BlendMode.srcIn) //
-                      : ColorFilter.mode(
-                          Colors.grey.withValues(alpha: 1),
-                          BlendMode.srcATop,
-                        ), // Apply white tint in dark mode
-                ),
-              ),
-            ),
-          ),
+          // perso : fond PandaVPN (dégradé doux, halo vert derrière le bouton, bambous discrets)
+          RepaintBoundary(child: PandaBackground(dark: theme.brightness == Brightness.dark)),
           Stack(
             alignment: Alignment.center,
             children: [
@@ -178,7 +137,8 @@ class HomePage extends HookConsumerWidget {
                   ),
                 ),
               ),
-              if (ref.watch(hasAnyProfileProvider).value ?? false)
+              // perso : onglet « Réglages rapides » retiré (tout est dans Paramètres)
+              if (false)
                 Positioned(
                   right: 0,
                   left: 0,
@@ -252,4 +212,89 @@ class AppVersionLabel extends HookConsumerWidget {
       ),
     );
   }
+}
+
+
+/// perso : fond de l'accueil, dessiné une fois (statique).
+class PandaBackground extends StatelessWidget {
+  const PandaBackground({super.key, required this.dark});
+  final bool dark;
+
+  @override
+  Widget build(BuildContext context) {
+    const bamboo = Color(0xFF1F8A4C);
+    final base = Theme.of(context).colorScheme.surface;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: dark
+                  ? [Color.lerp(base, bamboo, .10)!, base, Color.lerp(base, Colors.black, .25)!]
+                  : [Color.lerp(base, bamboo, .07)!, base, Color.lerp(base, bamboo, .05)!],
+              stops: const [0, .55, 1],
+            ),
+          ),
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0, -.15),
+              radius: .7,
+              colors: [
+                bamboo.withValues(alpha: dark ? .16 : .10),
+                bamboo.withValues(alpha: 0),
+              ],
+            ),
+          ),
+        ),
+        CustomPaint(painter: _BambooPainter(color: bamboo.withValues(alpha: dark ? .10 : .12))),
+      ],
+    );
+  }
+}
+
+class _BambooPainter extends CustomPainter {
+  const _BambooPainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stalk = Paint()..color = color;
+    final node = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    final unit = size.width / 12;
+    // (abscisse relative, hauteur relative, épaisseur)
+    const stalks = [(.06, .30, 1.0), (.14, .22, .8), (.88, .26, .9), (.95, .18, .7)];
+    for (final (x, h, w) in stalks) {
+      final width = unit * .45 * w;
+      final left = size.width * x - width / 2;
+      final top = size.height * (1 - h);
+      final rect = RRect.fromLTRBR(left, top, left + width, size.height + 4, Radius.circular(width / 2));
+      canvas.drawRRect(rect, stalk);
+      // nœuds du bambou
+      for (var y = top + unit * 1.4; y < size.height; y += unit * 1.6) {
+        canvas.drawLine(Offset(left - 1, y), Offset(left + width + 1, y), node);
+      }
+      // deux feuilles en haut de la tige
+      final leafLen = unit * 1.3 * w;
+      final cx = left + width / 2;
+      for (final dir in [-1.0, 1.0]) {
+        final path = Path()
+          ..moveTo(cx, top + unit * .5)
+          ..quadraticBezierTo(cx + dir * leafLen * .6, top - leafLen * .15, cx + dir * leafLen, top + unit * .1)
+          ..quadraticBezierTo(cx + dir * leafLen * .5, top + unit * .55, cx, top + unit * .5)
+          ..close();
+        canvas.drawPath(path, stalk);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BambooPainter old) => old.color != color;
 }
