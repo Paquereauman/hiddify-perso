@@ -24,6 +24,8 @@ $env:PATH = "C:\dev\flutter\bin;$env:JAVA_HOME\bin;$env:PATH"
 function Etape($m) { Write-Host "`n== $m" -ForegroundColor Cyan }
 
 Set-Location $app
+# fichiers que Flutter régénère à chaque compilation : jamais des modifications PandaVPN
+git checkout -- linux/flutter macos/Flutter windows/flutter 2>$null
 if (git status --porcelain --untracked-files=no) { throw "Des modifications ne sont pas commitées dans hiddify-app : commite-les d'abord." }
 $old = (Get-Content $baseFile -ErrorAction Stop).Trim()
 
